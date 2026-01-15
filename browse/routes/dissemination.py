@@ -7,7 +7,8 @@ from flask import Blueprint, redirect, url_for, Response, render_template, reque
 from werkzeug.exceptions import InternalServerError, BadRequest
 
 from browse.controllers import check_supplied_identifier
-from browse.controllers.files.dissemination import get_html_response, get_pdf_resp, get_ps_response
+from arxiv.files import fileformat
+from browse.controllers.files.dissemination import get_html_response, get_pdf_resp, get_ps_response, get_dissemination_resp, _html_scaffold_for_latexml
 from browse.services.documents import get_doc_service
 
 blueprint = Blueprint('dissemination', __name__)
@@ -116,3 +117,9 @@ def html(arxiv_id: str, archive: Optional[str] = None):  # type: ignore
 def ps(arxiv_id: str, archive: Optional[str] = None) -> Response:
     """Get ps for article."""
     return get_ps_response(arxiv_id, archive)
+
+from arxiv.files import FileObj
+
+@blueprint.route("/mockhtml", methods=['GET', 'HEAD'])
+def mock_html() -> Response:
+    return get_dissemination_resp(fileformat.html, "1404.6549", "", _html_scaffold_for_latexml)

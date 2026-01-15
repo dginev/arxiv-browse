@@ -18,7 +18,7 @@ def post_process_html(byte_line:bytes) -> bytes:
     add in any ABS or LIST lines.
 
     If this is run after the app code returns, say with
-    `make_resposne(post_process_html(somefile))` this needs to be used with
+    `make_response(post_process_html(somefile))` this needs to be used with
     `flask.stream_with_context`.
     """
     #line=byte_line.decode('utf-8')
