@@ -17,7 +17,7 @@ from browse.controllers.files import last_modified, add_time_headers, \
 
 from arxiv.files import FileObj, FileTransform
 
-from browse.services.html_processing import post_process_html
+from browse.services.html_processing import post_process_html, render_branded_html_paper, HTMLFileTransform
 from browse.services.dissemination import get_article_store
 from browse.services.dissemination.article_store import (
     Acceptable_Format_Requests, KnownReason, Deleted)
@@ -205,7 +205,8 @@ def _html_response(file_list: Union[List[FileObj],FileObj],
     if docmeta.source_format == 'html' or version.source_flag.html:
         resp= _html_source_listing_response(file_list, arxiv_id)
     elif isinstance(file_list, FileObj): #converted via latexml
-        resp = _html_scaffold_for_latexml(file_list, arxiv_id, docmeta, version)
+        resp = default_resp_fn(HTMLFileTransform(file_list, render_branded_html_paper, docmeta),\
+                                arxiv_id, docmeta, version)
         resp.headers=add_surrogate_key(resp.headers,["html-latexml"])
         if _is_html_name(file_list):
             resp.headers['X-Robots-Tag'] = 'nofollow'
@@ -255,34 +256,6 @@ def _html_source_listing_response(file_list: Union[List[FileObj],FileObj], arxiv
     
     resp.headers=add_surrogate_key(resp.headers,["html-native"])
     return resp
-
-def _html_scaffold_for_latexml(file:FileObj, arxiv_id: Identifier,
-                               docmeta: DocMetadata, version: VersionEntry) -> Response:
-    content_handle = file.open("r")
-    for line in content_handle:
-        if 'addons_new.js' in line:
-            # pre 02.2026, we used JS rewrites and just returned the GCP bucket HTML content directly
-            # Backwards compatibility: we check for those assets (addons_new.js in the <head>) and return as-is
-            return default_resp_fn(file, arxiv_id, docmeta, version)
-        elif '<body>' in line:
-            break
-    create_favicon();
-    add_abs_refs_to_toc();
-    unwrap_nav();
-    let metadata = await get_metadata();
-    create_header(metadata);
-    create_mobile_header();
-    generate_upper_content_from_metadata(metadata);
-
-    delete_footer();
-    create_footer();
-    for line in content_handle
-    # post 02.2026, we do full HTML post-processing and need to inject our own assets
-            content_handle.seek(0)
-            processed_handle = post_process_html(content_handle)
-            return default_resp_fn(FileTransform(file, lambda _: processed_handle), arxiv_id, docmeta, version)
-    content_handle.seek(0)
-
 
 def _get_html_file_name(name:str) -> str:
     # file paths should be of form "ps_cache/cs/html/0003/0003064v1/HTTPFS-Paper.html" with a minimum of 5 slashes

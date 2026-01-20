@@ -1,9 +1,12 @@
-import arxiv.document.exceptions
 from flask import render_template, url_for
-from arxiv.identifier import Identifier, IdentifierException
+from datetime import datetime
 import re
+import typing
 import urllib.parse
+import arxiv.document.exceptions
+from arxiv.identifier import Identifier, IdentifierException
 from arxiv.document.metadata import DocMetadata
+from arxiv.files import FileObj, FileTransform
 from browse.services.documents import get_doc_service
 from browse.controllers.list_page import dl_for_article, latexml_links_for_article, authors_for_article
 import logging
@@ -72,3 +75,95 @@ def post_process_html(byte_line:bytes) -> bytes:
 
 def author_query(article: DocMetadata, query: str)->str:
     return str(url_for('search_box', searchtype='author', query=query))
+
+# This is a stateless transform that can insert scaffolding at the usual global markup transition points.
+def render_branded_html_paper(byte_line:bytes, state: str, abs_meta: DocMetadata) -> bytes:
+    """ We brand and post-process the latexml-generated HTML asset, to allow for change management
+        of branded materials within arxiv-browse itself.
+        
+        The HTML assets from latexml include a single versioned CSS and JS asset, each of which served
+        from browse, and coordinated with a LaTeXML version/release. Logic depending on latexml markup
+        belongs either in latexml, in our conversion worker or in the CSS/JS assets, not here.
+
+        arXiv-branded headers, footers, etc are added here.
+    """
+    if state == 'head':
+        if re.search(b'</head>$', byte_line, re.I):
+            # insert new head mixins before </head>
+            return ('head_end', \
+                render_template("dissemination/html_scaffold_head_mixins.html", abs_meta=abs_meta)
+                .encode('utf-8') + byte_line)
+        elif re.match(b'<(link|script) ', byte_line, re.I) and \
+            re.search(b'(?:addons_new|bootstrap\.bundle\.min|html2canvas\.min|feedbackOverlay)\.js', byte_line):
+            # pre 02.2026, we used JS rewrites and just returned the GCP bucket HTML content directly
+            # For backwards compatibility: we remove those assets to avoid conflicts. Ideally these gradually
+            #     fade out as we reconvert the entire collection with the latest LaTeXML recipe.
+            return (state, b'')
+        else:
+            # pass through all other lines unmodified
+            return (state, byte_line)
+    elif state == 'head_end' and re.match(b'<body>', byte_line, re.I):
+        return ('body', \
+            byte_line + render_template("dissemination/html_scaffold_header.html", abs_meta=abs_meta)
+            .encode('utf-8'))
+    elif state.startswith('body'):
+        if state == 'body' and re.match(b'\s*<div class="ltx_page_content"', byte_line, re.I):
+            return ('body_content', \
+                render_template("dissemination/html_scaffold_callout_license.html", abs_meta=abs_meta)
+                .encode('utf-8') + byte_line)
+        elif state == 'body_footer': # skip the original latexml footer, we render an arXiv one
+            if re.search(b'</footer>$', byte_line, re.I):
+                return ('body_content', '')
+            else: 
+                return ('body_footer', '')
+        elif state == 'body_content':
+            if re.match(b'<footer', byte_line, re.I):
+                return ('body_footer', '')
+            elif re.match(b'</body>', byte_line, re.I):
+                return ('body_end', \
+                    render_template("dissemination/html_scaffold_footer.html", abs_meta=abs_meta)
+                    .encode('utf-8') + byte_line)
+        else:
+            # pass through all other lines unmodified
+            return (state, byte_line)
+    # pass through all other lines unmodified
+    return (state, byte_line)
+
+# This helper belongs in arxiv-base
+def license_url_to_str_mapping(url: str | None) -> str:
+        if not url:
+            return "No License"
+        elif url == "http://arxiv.org/licenses/nonexclusive-distrib/1.0/":
+            license = "arXiv.org perpetual non-exclusive license"
+        elif url == "http://creativecommons.org/licenses/by-nc-nd/4.0/":
+            license = "CC BY-NC-ND 4.0"
+        elif url == "http://creativecommons.org/licenses/by-sa/4.0/":
+            license = "CC BY-SA 4.0"
+        elif (
+            url == "http://creativecommons.org/publicdomain/zero/1.0/"
+            or url == "http://creativecommons.org/licenses/publicdomain/"
+        ):
+            license = "CC Zero"
+        elif match := re.match(r"http:\/\/creativecommons\.org\/licenses\/by-nc-sa\/(\d\.0)\/", url):
+            license = f"CC BY-NC-SA {match.group(1)}"
+        elif match := re.match(r"http:\/\/creativecommons\.org\/licenses\/by\/(\d\.0)\/", url):
+            license = f"CC BY {match.group(1)}"
+        return f"License: {license}"
+
+class HTMLFileTransform(FileTransform):
+    """ A stateful `FileTransform` that applies HTML post-processing and branding to HTML papers.
+        We track the state of the HTML asset being transformed in this object, to minimize regex overhead.
+
+        Note: Depends on DB access to get metadata for licensing header.
+    """
+    def __init__(self, file: FileObj, transform_fn: typing.Callable[[bytes, str, DocMetadata], bytes], abs_meta: DocMetadata):
+        self.fileobj = file
+        self.transform_fn = transform_fn
+        self.abs_meta = abs_meta
+        abs_meta.license.short_label = license_url_to_str_mapping(abs_meta.license.recorded_uri)
+        self.transform_state = 'head' # initial transform state
+
+    def transform(self, data: bytes) -> bytes:
+        (new_state, new_data) = self.transform_fn(data, self.transform_state, self.abs_meta)
+        self.transform_state = new_state
+        return new_data
