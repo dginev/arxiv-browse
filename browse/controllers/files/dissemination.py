@@ -205,8 +205,11 @@ def _html_response(file_list: Union[List[FileObj],FileObj],
     if docmeta.source_format == 'html' or version.source_flag.html:
         resp= _html_source_listing_response(file_list, arxiv_id)
     elif isinstance(file_list, FileObj): #converted via latexml
-        resp = default_resp_fn(HTMLFileTransform(file_list, render_branded_html_paper, docmeta),\
-                                arxiv_id, docmeta, version)
+        if file_list.name.endswith('.html'):  # only transform HTML
+            resp = default_resp_fn(HTMLFileTransform(file_list, render_branded_html_paper, docmeta),\
+                                    arxiv_id, docmeta, version)
+        else: # PNGs and other assets served as-is
+            resp = default_resp_fn(file_list, arxiv_id, docmeta, version)
         resp.headers=add_surrogate_key(resp.headers,["html-latexml"])
         if _is_html_name(file_list):
             resp.headers['X-Robots-Tag'] = 'nofollow'
