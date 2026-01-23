@@ -1,11 +1,4 @@
 @import "https://use.typekit.net/utz6mli.css" layer(typekit);
-@import "https://arxiv.org/static/browse/0.3.4/css/ar5iv.0.8.4.css" layer(ar5iv);
-@import "https://arxiv.org/static/browse/0.3.4/css/arxiv-html-papers-theme-20250916.css" layer(arxiv-theme);
-@layer typekit, ar5iv, arxiv-theme, patches;
-
-
-@layer patches {
-  .ltx_page_navbar {
-    display: none;
-  }
-}
+@import "/static/browse/0.3.4/css/ar5iv.0.8.4.css" layer(ar5iv);
+@import "/static/browse/0.3.4/css/arxiv-html-papers-theme-20250131.css" layer(arxiv-theme);
+@layer typekit, ar5iv, arxiv-theme;
