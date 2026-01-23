@@ -87,47 +87,56 @@ def render_branded_html_paper(byte_line:bytes, state: str, abs_meta: DocMetadata
 
         arXiv-branded headers, footers, etc are added here.
     """
-    if state == 'head':
-        if re.search(b'</head>$', byte_line, re.I):
-            # insert new head mixins before </head>
-            return ('head_end', \
-                render_template("dissemination/html_scaffold_head_mixins.html", abs_meta=abs_meta)
-                .encode('utf-8') + byte_line)
-        elif re.match(b'<(link|script) ', byte_line, re.I) and \
-            re.search(b'(?:addons_new|bootstrap\.bundle\.min|html2canvas\.min|feedbackOverlay)\.js', byte_line):
-            # pre 02.2026, we used JS rewrites and just returned the GCP bucket HTML content directly
-            # For backwards compatibility: we remove those assets to avoid conflicts. Ideally these gradually
-            #     fade out as we reconvert the entire collection with the latest LaTeXML recipe.
-            return (state, b'')
-        else:
-            # pass through all other lines unmodified
+    match state:
+        case 'noop':
+            # once in noop state, we remain there
             return (state, byte_line)
-    elif state == 'head_end' and re.match(b'<body>', byte_line, re.I):
-        return ('body', \
-            byte_line + render_template("dissemination/html_scaffold_header.html", abs_meta=abs_meta)
-            .encode('utf-8'))
-    elif state.startswith('body'):
-        if state == 'body' and re.match(b'\s*<div class="ltx_page_content"', byte_line, re.I):
-            return ('body_content', \
-                render_template("dissemination/html_scaffold_callout_license.html", abs_meta=abs_meta)
-                .encode('utf-8') + byte_line)
-        elif state == 'body_footer': # skip the original latexml footer, we render an arXiv one
+        case 'head':
+            if re.search(b'</head>$', byte_line, re.I):
+                # insert new head mixins before </head>
+                return ('head_end', \
+                    render_template("dissemination/html_scaffold_head_mixins.html", abs_meta=abs_meta)
+                    .encode('utf-8') + byte_line)
+            elif re.match(b'<(link|script) ', byte_line, re.I) and \
+                re.search(b'(?:addons_new|bootstrap\.bundle\.min|html2canvas\.min|feedbackOverlay)\.js', byte_line):
+                # pre 02.2026, we used JS rewrites and just returned the GCP bucket HTML content directly
+                # For backwards compatibility: when encountering those cases, ABORT REWRITE (noop state)
+                return ("noop", byte_line)
+            else:
+                # pass through all other lines unmodified
+                return (state, byte_line)
+        case 'head_end':
+            if re.match(b'<body>', byte_line, re.I):
+                return ('body', \
+                    byte_line + render_template("dissemination/html_scaffold_header.html",
+                                                 abs_meta=abs_meta)
+                    .encode('utf-8'))
+            else: # continue until we find <body>
+                return (state, byte_line)
+        case 'body':
+            if re.match(b'\s*<div class="ltx_page_content"', byte_line, re.I):
+                return ('body_content', \
+                    render_template("dissemination/html_scaffold_callout_license.html", abs_meta=abs_meta)
+                    .encode('utf-8') + byte_line)
+            else:
+                return (state, byte_line)
+        case 'body_footer': # skip the original latexml footer, we render an arXiv one
             if re.search(b'</footer>$', byte_line, re.I):
-                return ('body_content', '')
+                return ('body_content', '') # skipping completed.
             else: 
                 return ('body_footer', '')
-        elif state == 'body_content':
+        case 'body_content':
             if re.match(b'<footer', byte_line, re.I):
                 return ('body_footer', '')
             elif re.match(b'</body>', byte_line, re.I):
                 return ('body_end', \
                     render_template("dissemination/html_scaffold_footer.html", abs_meta=abs_meta)
                     .encode('utf-8') + byte_line)
-        else:
+            else:
+                return (state, byte_line)
+        case _:
             # pass through all other lines unmodified
             return (state, byte_line)
-    # pass through all other lines unmodified
-    return (state, byte_line)
 
 # This helper belongs in arxiv-base
 def license_url_to_str_mapping(url: str | None) -> str:
