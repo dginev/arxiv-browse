@@ -1,4 +1,4 @@
-@layer fonts, tokens, ar5iv-patches, print, header, infobox, footer, nav-toc, ui-report-issue, ui-back-reference, mobile;
+@layer fonts, tokens, ar5iv-patches, print, header, infobox, footer, nav-toc, ui-report-issue, ui-back-reference, responsive-layout;
 
 @layer fonts {
   @font-face {
@@ -102,10 +102,7 @@
     padding: .5em 4em;
     align-items: center;
     user-select: none;
-  }
-
-  header a {
-    color: white;
+    box-sizing: border-box;
   }
 
   header a:hover {
@@ -144,13 +141,13 @@
     content: "beta";
     position: absolute;
     z-index: 1070;
-    width: 80px;
-    height: 25px;
+    width: 72px;
+    height: 24px;
     background: #fb595a;
     top: 7px;
     left: -20px;
     text-align: center;
-    font-size: 12px;
+    font-size: 0.8rem;
     letter-spacing: 1px;
     font-family: sans-serif;
     text-transform: uppercase;
@@ -175,21 +172,6 @@
   .hover-effect:hover {
     text-decoration: underline;
     color: var(--note-highlight-color);
-  }
-
-
-  header {
-    background-color: #b31313;
-    display: flex;
-    justify-content: space-between;
-    padding: .5em 4em;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  header a {
-    color: var(--header-text-color) !important;
   }
 
   header.desktop_header {
@@ -217,7 +199,7 @@
   }
 
   header .html-header-message a:hover {
-    color: var(--header-text-color) !important;
+    color: var(--header-text-color);
   }
 
   header .html-header-nav {
@@ -227,7 +209,7 @@
 
   header .html-header-nav a {
     text-decoration: none;
-    color: var(--header-text-color) !important;
+    color: var(--header-text-color);
   }
 
   header .html-header-nav a:hover {
@@ -301,14 +283,6 @@
     width: 1.2rem;
   }
 
-  .color-scheme-icon::before {
-    content: "🌙";
-  }
-
-  [data-theme="dark"] .color-scheme-icon::before {
-    content: "☀️";
-  }
-
   .ar5iv-toggle-color-scheme {
     text-decoration: none;
     display: block;
@@ -317,6 +291,12 @@
     margin-top: 0.1rem;
     color: transparent;
     text-shadow: 0 0 0 var(--header-text-color);
+  }
+  .automatic-tog {
+    display: visible;
+  }
+  .light-tog, .dark-tog {
+    display: none;
   }
 
 }
@@ -349,43 +329,59 @@
 
 /* Styling the arXiv navigational table of contents */
 @layer nav-toc {
-  .ltx_TOC>h6,
-  .ltx_title_abstract {
-    color: var(--text-color);
-  }
   /*TOC link color*/
   .ltx_TOC>.ltx_toclist>.ltx_tocentry>a.ltx_ref {
     color: var(--secondary-text-color) !important;
+    font-family: var(--toc-font-family);
+    font-size: 0.85rem;
+    font-weight: bold;
   }
 
   .ltx_TOC>.ltx_toclist>.ltx_tocentry>a.ltx_ref:hover {
-    color: var(--link-text-color) !important;
+    color: var(--link-text-color);
   }
-  .ltx_TOC>.ltx_toclist>.ltx_tocentry>a.ltx_ref:hover {
+  .ltx_TOC>.ltx_toclist>.ltx_tocentry {
+    margin-bottom: 0.3rem;
+    margin-left: 1.5rem;
+  }
+  /* TOC styles */
+  .ltx_ref:hover {
+    /* background-color: var(--note-highlight-color); */
+    /* Add underline */
+    text-decoration: underline;
+    /* Chaneg text color */
+    color: var(--toc-text-highlight-color);
+  }
+
+  .ltx_p>.ltx_ref:hover,
+  .ltx_cite>.ltx_ref:hover {
     color: var(--inpage-text-highlight-color);
   }
 
   /* Navigation table of contents:
   On wide displays, shown as sticky in the left sidebar, unless hidden via the dropdown menu.
   On narrow displays, hidden, until requested via the dropdown menu.
+  Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC fits neatly.
 
   Note, we need a specific selector, because
    the innermost .ltx_text spans have a defined font-family. */
 
-  @media only screen and (min-width: 768px) {
-    .ltx_page_navbar>nav.ltx_TOC {
-      position: fixed;
-      top: 8.5vh;
-      margin: 0;
-      width: 100%;
+  @media only screen and (min-width: 1280px) {
+    .ltx_page_navbar {
+      position: sticky;
+      top: 10vh;
+      margin-right: 1rem;
       height: 100vh;
       z-index: 2;
-      overflow-y: auto;
       user-select: none;
+    }
+    .ltx_page_navbar>nav.ltx_TOC {
+      width: 100%;
+      overflow-y: auto;
       color: var(--text-color);
     }
   }
-  @media only screen and (max-width: 719px) {
+  @media only screen and (max-width: 1279px) {
     .ltx_page_navbar, nav.ltx_TOC {
       display: none;
     }
@@ -395,14 +391,15 @@
     display: none;
   }
 
-  nav.ltx_TOC .ltx_tocentry.ltx_tocentry_subsection {
+  /* keep nav compact, avoid fine-grained entries */
+  .ltx_TOC .ltx_tocentry.ltx_tocentry_subsection {
     display: none;
-    /* keep nav compact, avoid fine-grained entries */
+  }
+  .ltx_TOC .ltx_tag_ref {
+    margin-right: 0;
+    padding: 0;
   }
 
-  nav.ltx_TOC .ltx_text {
-    font-family: var(--toc-font-family);
-  }
   .ltx_toclist a.active {
     font-weight: bold;
     /* You can apply any styling you want to indicate the active link */
@@ -519,7 +516,7 @@
   }
 
   /* Hover for openForm */
-  @media (min-width: 768px) {
+  @media (min-width: 1280px) {
 
     #openForm:hover,
     #modal-submit:hover,
@@ -530,7 +527,7 @@
     }
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 1279px) {
     #openForm:active,
     #modal-submit:active,
     small-report-button:hover {
@@ -572,12 +569,6 @@
     cursor: pointer;
   }
 
-  /* Form label */
-  label {
-    display: block;
-    margin-bottom: 5px;
-  }
-
   .modal-submit {
     display: block;
     margin: 10px 0;
@@ -614,6 +605,9 @@
   }
   .ar5iv-footer-button {
     color: var(--link-text-color);
+  }
+  .ar5iv-footer-button, .header-button {
+    font-size: 1rem;
     font-family: var(--other-font-family);
     padding: 0.5rem;
     display: inline-block;
@@ -667,10 +661,6 @@
     white-space: normal;
   }
 
-  article {
-    width: 100%;
-  }
-
   .ltx_bibblock {
     box-sizing: border-box;
     width: 100%;
@@ -680,78 +670,17 @@
     color: var(--text-color) !important;
   }
 
-  /* narrow desktop */
-  @media only screen and (min-width: 980px) and (max-width: 1180px) {
-    .ltx_page_main>.ltx_page_content {
-      margin: 6.5em 1em 3.5em 1em;
-    }
-  }
-
-  /* tablet */
-  @media only screen and (min-width: 720px) and (max-width: 980px) {
-    .ltx_page_main>.ltx_page_content {
-      margin: 6.5em 2em 3.5em 2em;
-      padding: 1em;
-    }
-
-    .ltx_page_main>.ltx_TOC.active {
-      max-width: 15%;
-    }
-
-    .ltx_page_main>.ltx_TOC:not(.active) {
-      margin-right: -30px;
-    }
-  }
-
-  .ltx_page_main {
-    display: flex;
-  }
-
-  .ltx_page_main>.ltx_page_content {
-    width: 100%;
-    margin: 5.5em 1em 3.5em 1em;
-    flex-grow: 0;
-    /* This allows the content to grow and consume remaining space */
-    flex-shrink: 1;
-    overflow-x: auto;
-    overflow-y: clip;
-  }
-
   [data-theme=dark] .ltx_TOC {
     background-color: var(--background-color);
     color: #c9d1d9;
-  }
-
-  .ltx_TOC>.ltx_toclist>.ltx_tocentry {
-    margin-bottom: 0.3em;
-    margin-left: 1.5rem;
-  }
-
-  .ltx_tocentry.ltx_tocentry_appendix {
-    margin-bottom: 0.3rem;
-    margin-left: 1.5rem;
-  }
-
-  /* TOC styles */
-  .ltx_ref:hover {
-    /* background-color: var(--note-highlight-color); */
-    /* Add underline */
-    text-decoration: underline;
-    /* Chaneg text color */
-    color: var(--toc-text-highlight-color);
-  }
-
-  .ltx_p>.ltx_ref:hover,
-  .ltx_cite>.ltx_ref:hover {
-    color: var(--inpage-text-highlight-color);
   }
 }
 
 /* Styling the infobox containing license, date and other arXiv metadata.  */
 @layer infobox {
-  #target-section {
-    padding-top: 5px;
-    position: relative;
+  #infobox {
+    padding-top: 0.5rem;
+    margin:auto;
   }
 
   #license-tr,
@@ -859,46 +788,37 @@
   }
 }
 
-/* Styles for printing an HTML Paper page */
-@layer print {
-  @media print {
+@layer responsive-layout {
+  @media (min-width: 1280px) {
+    html { margin: 0; }
+    body {
+      width: 100vw;
+      margin: 0;
+      display: grid;
+      grid-template-columns:
+          1fr,
+          minmax(14rem, min(calc(var(--main-width)/2), 25vw)),
+          var(--main-width)                 
+          minmax(14rem, min(calc(var(--main-width)/2), 25vw)),
+          1fr;
 
-    /* All your print styles go here */
-    header,
-    nav,
-    footer,
-    body::after,
-    .ltx_page_footer,
-    .ltx_page_main>.ltx_TOC.flex,
-    .back-to-reference-btn,
-    #small-report-button,
-    #openForm {
-      display: none;
-    }
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas:
+        "header header  header  header header"
+        ".      nav     article .      ."
+        "footer footer  footer  footer footer";
 
-    /*problem*/
-    .ltx_page_main {
-      display: block;
-      width: 95%;
+      justify-content: normal;
     }
-
-    header {
-      padding: 1em;
-    }
-
-    .ar5iv-footer-button {
-      margin-right: 0em;
-    }
-
-    .ltx_para {
-      overflow: scroll;
-    }
+    body > header.desktop_header { grid-area: header; }
+    body > header.mob_header     { grid-area: header; }
+    body > nav.ltx_page_navbar   { grid-area: nav; }
+    div.ltx_page_main            { grid-area: article; }
+    footer#footer                { grid-area: footer; } 
   }
-}
 
-@layer mobile {
   /*mobile*/
-  @media only screen and (max-width: 719px) {
+  @media only screen and (max-width: 1279px) {
     .ltx_note>.ltx_note_mark {
       font-size: 1.2em;
       padding: 0.5rem;
@@ -989,17 +909,6 @@
       display: block !important;
     }
 
-    .ltx_page_main>.ltx_page_content {
-      padding: 1em;
-      margin: 3.5em 0 1em 0;
-      width: 100%;
-    }
-
-    .ltx_page_main {
-      padding: 0;
-      display: inline-block;
-    }
-
     header.mob_header {
       display: flex;
       position: absolute;
@@ -1017,6 +926,43 @@
     .ltx_bibitem {
       scroll-margin-top: 80px;
       /* equal to the height of your fixed header */
+    }
+  }
+}
+
+/* Styles for printing an HTML Paper page */
+@layer print {
+  @media print {
+
+    /* All your print styles go here */
+    header,
+    nav,
+    footer,
+    body::after,
+    .ltx_page_footer,
+    .ltx_page_main>.ltx_TOC.flex,
+    .back-to-reference-btn,
+    #small-report-button,
+    #openForm {
+      display: none;
+    }
+
+    /*problem*/
+    .ltx_page_main {
+      display: block;
+      width: 95%;
+    }
+
+    header {
+      padding: 1em;
+    }
+
+    .ar5iv-footer-button {
+      margin-right: 0em;
+    }
+
+    .ltx_para {
+      overflow: scroll;
     }
   }
 }
