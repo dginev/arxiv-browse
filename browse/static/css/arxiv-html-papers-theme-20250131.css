@@ -90,7 +90,7 @@
 
 /* Styling the branded arXiv header */
 @layer header {
-  .mob_header, .mob-header {
+  .mob_header {
     display: none;
   }
 
@@ -814,11 +814,11 @@
 
       justify-content: normal;
     }
-    body > header.desktop_header { grid-area: header; }
-    body > header.mob_header     { grid-area: header; }
-    body > nav.ltx_page_navbar   { grid-area: nav; }
-    div.ltx_page_main            { grid-area: article; }
-    footer#footer                { grid-area: footer; } 
+    body > header.desktop_header { grid-area: header;  contain: layout; }
+    body > header.mob_header     { grid-area: header;  contain: layout; }
+    body > nav.ltx_page_navbar   { grid-area: nav;     contain: layout; }
+    div.ltx_page_main            { grid-area: article; contain: layout; }
+    footer#footer                { grid-area: footer;  contain: layout; } 
   }
 
   /*mobile*/
