@@ -46,6 +46,7 @@
     /* darker blue, passes color contrast*/
     --error-text-color: #970503;
     /* dark red */
+    --nav-width: minmax(14rem, 25rem);
   }
 
   [data-theme=dark] {
@@ -89,7 +90,7 @@
 
 /* Styling the branded arXiv header */
 @layer header {
-  .mob_header {
+  .mob_header, .mob-header {
     display: none;
   }
 
@@ -618,6 +619,9 @@
 
 /* Overrides to main content decisions from ar5iv.css */
 @layer ar5iv-patches {
+  .ltx_page_content {
+    margin: 1rem;
+  }
   .ltx_cite>.ltx_ref:hover,
   .ltx_p>.ltx_ref:hover {
     text-decoration: none;
@@ -796,10 +800,10 @@
       margin: 0;
       display: grid;
       grid-template-columns:
-          1fr,
-          minmax(14rem, min(calc(var(--main-width)/2), 25vw)),
-          var(--main-width)                 
-          minmax(14rem, min(calc(var(--main-width)/2), 25vw)),
+          1fr
+          var(--nav-width)
+          var(--main-width)
+          var(--nav-width)
           1fr;
 
       grid-template-rows: auto 1fr auto;
