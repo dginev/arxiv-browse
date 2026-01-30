@@ -1,80 +1,79 @@
-@layer fonts, tokens, ar5iv-patches, print, header, infobox, footer, nav-toc, ui-report-issue, ui-back-reference, responsive-layout;
-
-@layer fonts {
-  @font-face {
-    font-family: STIX Two Math;
-    src: local('STIXTwoMath-Regular'),
-      url('/static/browse/0.3.4/fonts/STIXTwoMath-Regular.woff2');
-  }
+@font-face {
+  font-family: STIX Two Math;
+  font-display: auto;
+  src: local('STIXTwoMath-Regular'),
+    url('/static/browse/0.3.4/fonts/STIXTwoMath-Regular.woff2');
 }
+
+@layer tokens, ar5iv-patches, print, header, infobox, footer, nav-toc, ui-report-issue, ui-back-reference, responsive-layout;
 
 /* Design tokens for light and dark mode */
 @layer tokens {
   :root,
   [data-theme=light] {
-    --headings-font-family: "rival-sans";
-    --text-font-family: "rival-sans";
+    --headings-font-family: "rival-sans", sans-serif;
+    --text-font-family: "rival-sans", sans-serif;
     --math-font-family: "STIX Two Math", "Cambria Math", math;
     /* Should we do anything special for caligraphic?
       e.g. "Lucida Calligraphy","Zapf Chancery","URW Chancery L", TeX Gyre Termes...*/
     --math-caligraphic-font-family: var(--math-font-family);
-    --toc-font-family: "rival-sans";
-    --other-font-family: "rival-sans";
+    --toc-font-family: var(--text-font-family);
+    --other-font-family: var(--text-font-family);
     --code-font-family: "ibm-plex-mono", monospace;
-    --note-highlight-color: #f9f7f7;
     /* warm wash */
-    --toc-text-highlight-color: #b31b1b;
+    --note-highlight-color: #f9f7f7;
     /* Cornell Red */
-    --inpage-text-highlight-color: #1f5e96;
+    --toc-text-highlight-color: #b31b1b;
     /* Archival Blue */
-    --rp-button-hover-color: #fb595a;
+    --inpage-text-highlight-color: #1f5e96;
     /* Publishing Pink */
+    --rp-button-hover-color: #fb595a;
     --text-color: black;
-    --link-text-color: #1b7cac;
     /* blue, passes color contrast with white bg*/
+    --link-text-color: #1b7cac;
     --link-hover-color: #6b6459;
     --background-color: #ffffff;
-    --header-text-color: #f9f7f7;
     /* warm wash */
-    --secondary-text-color: #7D7568;
+    --header-text-color: #f9f7f7;
     /* lighter Library Grey */
-    --TOC-gradient: linear-gradient(#f9f7f7, #ffffff);
+    --secondary-text-color: #7D7568;
     /*warm wash to white*/
-    --error-background-color: #fff5f5;
+    --TOC-gradient: linear-gradient(#f9f7f7, #ffffff);
     /* light red */
-    --error-link-color: #1a78a8;
+    --error-background-color: #fff5f5;
     /* darker blue, passes color contrast*/
-    --error-text-color: #970503;
+    --error-link-color: #1a78a8;
     /* dark red */
+    --error-text-color: #970503;
     --nav-width: minmax(14rem, 25rem);
   }
 
   [data-theme=dark] {
-    --note-highlight-color: #6b6459;
     /* warm grey */
-    --toc-text-highlight-color: #a5d6fe;
+    --note-highlight-color: #6b6459;
     /* Open Blue */
+    --toc-text-highlight-color: #a5d6fe;
     --inpage-text-highlight-color: #a5d6fe;
-    --text-color: #f9f7f7;
     /* warm wash */
-    --link-text-color: #2198d4;
+    --text-color: #f9f7f7;
     /* blue, passes color contrast with dark bg */
+    --link-text-color: #2198d4;
     --link-hover-color: #a5d6fe;
     --background-color: #282623;
-    --rp-button-hover-color: #fb595a;
     /* Publishing Pink */
-    --header-text-color: #f9f7f7;
+    --rp-button-hover-color: #fb595a;
     /* warm wash */
-    --secondary-text-color: #ADA4A4;
+    --header-text-color: #f9f7f7;
     /* darker warm wash */
-    --TOC-gradient: linear-gradient(#110C03, #282623);
+    --secondary-text-color: #ADA4A4;
     /*darker shade to background*/
-    --error-background-color: #eee0cb;
+    --TOC-gradient: linear-gradient(#110C03, #282623);
     /* tan */
-    --error-link-color: #176992;
+    --error-background-color: #eee0cb;
     /* darker blue, passes color contrast */
-    --error-text-color: #970503;
+    --error-link-color: #176992;
     /* dark red */
+    --error-text-color: #970503;
   }
 
   /* Special hand-crafted case: \color{black} is the most common use, so hand-curate to match
@@ -82,8 +81,8 @@
     TODO: This color should be a design token name eventually. Without that we have to copy
     the full selector rule from ar5iv.css: */
   [data-theme="dark"] [style*="--ltx-fg-color:#000000;"] {
-    --text-color: #f9f7f7;
     /* warm wash */
+    --text-color: #f9f7f7;
     color: var(--text-color);
   }
 }
@@ -95,6 +94,7 @@
   }
 
   header {
+    position: sticky;
     background-color: #b31313;
     display: flex;
     top: 0;
@@ -122,25 +122,15 @@
   svg.icon,
   [data-theme=dark] svg.icon,
   header svg {
-    background-color: transparent !important;
-    z-index: 1 !important;
+    background-color: transparent;
+    z-index: 1;
     margin-left: 2px;
-  }
-
-  .header-message {
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    max-width: 50%;
-    font-family: var(--other-font-family);
-    font-size: smaller;
-    color: white;
   }
 
   /*BETA corner banner*/
   body:after {
     content: "beta";
-    position: absolute;
+    position: fixed;
     z-index: 1070;
     width: 72px;
     height: 24px;
@@ -170,11 +160,6 @@
     overflow: hidden;
   }
   /* Build for header */
-  .hover-effect:hover {
-    text-decoration: underline;
-    color: var(--note-highlight-color);
-  }
-
   header.desktop_header {
     z-index: 2;
     display: flex;
@@ -184,8 +169,8 @@
   header .html-header-logo .logo,
   header .html-header-logo .logomark {
     background-color: transparent;
-    filter: brightness(1);
     /*overrides ar5iv translucent style in dark mode*/
+    filter: brightness(1);
   }
 
   header .html-header-message {
@@ -251,27 +236,6 @@
     background-color: transparent !important;
   }
 
-  .body-message {
-    display: block;
-    max-width: 40em;
-    margin: 3em auto;
-    border: 2px solid #a5d6fe;
-    font-family: "Noto Serif", serif;
-    border-radius: 5px;
-    padding: 1em;
-    box-shadow: 1px 3px 8px 0.1px grey;
-  }
-
-  .body-message p,
-  .body-message-mobile p {
-    margin: 0;
-    margin-top: -15px;
-  }
-
-  .body-message-mobile {
-    display: none;
-  }
-
   .toggle-icon {
     color: currentColor;
     cursor: pointer;
@@ -305,8 +269,11 @@
 /* Styling the branded arXiv footer */
 @layer footer {
   footer {
-    font-family: var(--other-font-family);
     user-select: none;
+    margin: 2rem auto auto auto;
+    font-family: var(--other-font-family);
+    max-width: var(--main-width);
+    text-rendering: optimizeLegibility;
   }
 
   footer h2 {
@@ -321,52 +288,15 @@
   footer .keyboard-glossary {
     margin-bottom: 3em;
   }
-
-  .ltx_page_footer {
-    font-family: arial, tahoma, sans-serif;
-    user-select: none;
-  }
 }
 
-/* Styling the arXiv navigational table of contents */
+/* Navigation table of contents:
+On wide displays, shown as sticky in the left sidebar, unless hidden via the dropdown menu.
+On narrow displays, hidden, until requested via the dropdown menu.
+Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC fits neatly.
+*/
+
 @layer nav-toc {
-  /*TOC link color*/
-  .ltx_TOC>.ltx_toclist>.ltx_tocentry>a.ltx_ref {
-    color: var(--secondary-text-color) !important;
-    font-family: var(--toc-font-family);
-    font-size: 0.85rem;
-    font-weight: bold;
-  }
-
-  .ltx_TOC>.ltx_toclist>.ltx_tocentry>a.ltx_ref:hover {
-    color: var(--link-text-color);
-  }
-  .ltx_TOC>.ltx_toclist>.ltx_tocentry {
-    margin-bottom: 0.3rem;
-    margin-left: 1.5rem;
-  }
-  /* TOC styles */
-  .ltx_ref:hover {
-    /* background-color: var(--note-highlight-color); */
-    /* Add underline */
-    text-decoration: underline;
-    /* Chaneg text color */
-    color: var(--toc-text-highlight-color);
-  }
-
-  .ltx_p>.ltx_ref:hover,
-  .ltx_cite>.ltx_ref:hover {
-    color: var(--inpage-text-highlight-color);
-  }
-
-  /* Navigation table of contents:
-  On wide displays, shown as sticky in the left sidebar, unless hidden via the dropdown menu.
-  On narrow displays, hidden, until requested via the dropdown menu.
-  Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC fits neatly.
-
-  Note, we need a specific selector, because
-   the innermost .ltx_text spans have a defined font-family. */
-
   @media only screen and (min-width: 1280px) {
     .ltx_page_navbar {
       position: sticky;
@@ -401,43 +331,29 @@
     padding: 0;
   }
 
+  .ltx_tocentry > a.ltx_ref {
+    color: var(--secondary-text-color);
+    font-family: var(--toc-font-family);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border: none;
+  }
+
+  .ltx_tocentry > a.ltx_ref:hover {
+    color: var(--toc-text-highlight-color);
+    text-decoration: none;
+    border: none;
+  }
+  .ltx_tocentry {
+    margin-bottom: 0.3rem;
+    margin-left: 1.5rem;
+  }
+
   .ltx_toclist a.active {
     font-weight: bold;
     /* You can apply any styling you want to indicate the active link */
     background-color: var(--note-highlight-color);
-  }
-
-
-  #listIcon {
-    width: 20px;
-    height: 20px;
-    margin-left: 1.4rem;
-    margin-top: 10px;
-    margin-bottom: 1rem;
-    /* align-items: center; */
-    z-index: 100;
-    /* display: none; */
-  }
-
-  #arrowIcon {
-    width: 20px;
-    height: 20px;
-    margin-left: 1.4rem;
-    margin-top: 10px;
-    margin-bottom: 1rem;
-    /* align-items: center; */
-    /* display: block; */
-  }
-
-  #listIcon svg,
-  #arrowIcon svg {
-    background-color: transparent;
-    fill: var(--text-color) !important;
-  }
-
-  #listIcon svg:hover,
-  #arrowIcon svg:hover {
-    fill: var(--link-text-color) !important;
   }
 
   .navbar-toggler:focus {
@@ -447,6 +363,10 @@
   [data-bs-theme=dark] .navbar-toggler-icon {
     --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='1em' viewBox='0 0 448 512'%3E%3Cstyle%3Esvg%7Bfill%3A%23fdf7f7%7D%3C/style%3E%3Cpath d='M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z'/%3E%3C/svg%3E");
   }
+
+  :target {
+    scroll-margin-top: 4rem;
+  }
 }
 
 /* Styling related to the "report issue" feature */
@@ -455,7 +375,6 @@
     background-color: #b31b1b;
     border-color: #690604;
   }
-
 
   .btn {
     font-family: var(--other-font-family);
@@ -507,13 +426,19 @@
     max-height: 400px;
   }
 
+  #openForm,
+  #small-report-button {
+    font-size: 20px;
+    background-color: #b31b1b;
+    border-color: var(--secondary-text-color);
+  }
   #openForm {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    font-size: 20px;
-    background-color: #b31b1b;
-    border-color: var(--secondary-text-color);
+  }
+  #small-report-button { 
+    display: none; 
   }
 
   /* Hover for openForm */
@@ -537,8 +462,12 @@
       color: black;
     }
   }
+  /* Modal hidden until triggered */
+  .modal {
+    display: none; 
+  }
   /* Modal Content/Box */
-  [data-theme=light] .modal-content {
+    [data-theme=light] .modal-content {
     background-color: #fefefe;
     margin: 15% auto;
     /* 15% from the top and centered */
@@ -622,27 +551,16 @@
   .ltx_page_content {
     margin: 1rem;
   }
-  .ltx_cite>.ltx_ref:hover,
-  .ltx_p>.ltx_ref:hover {
+  .ltx_ref:hover {
     text-decoration: none;
+    color: var(--inpage-text-highlight-color);
   }
 
-  .ltx_cite>.ltx_ref {
+  .ltx_ref {
     text-decoration: underline;
-    border-bottom: none;
-  }
-
-  .ltx_p>.ltx_ref {
-    text-decoration: underline;
-    border-bottom: none;
-  }
-
-  .ltx_note>.ltx_note_mark {
-    text-decoration: underline;
-  }
-
-  .ltx_note>.ltx_note_mark:hover {
-    text-decoration: none;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: from-font;
+    border: none;
   }
 
   .ltx_tag_bibitem:active~*,
@@ -921,15 +839,6 @@
 
     header.desktop_header {
       display: none;
-    }
-
-    section {
-      scroll-margin-top: 85px;
-    }
-
-    .ltx_bibitem {
-      scroll-margin-top: 80px;
-      /* equal to the height of your fixed header */
     }
   }
 }

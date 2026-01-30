@@ -41,7 +41,7 @@
     </div>
     <nav class="html-header-nav">
       <a class="header-button hover-effect" href="https://info.arxiv.org/about/accessible_HTML.html" target="_blank">Why HTML?</a>
-      <a class="header-button hover-effect" target="_blank" href="#myForm" onclick="event.preventDefault(); var modal = document.getElementById('myForm'); modal.style.display = 'block'; bugReportState.setInitiateWay('Header');">Report Issue</a>
+      <a class="header-button hover-effect" target="_blank" href="#modalForm" onclick="event.preventDefault(); var modal = document.getElementById('modalForm'); modal.style.display = 'block'; bugReportState.setInitiateWay('Header');">Report Issue</a>
       <a class="header-button hover-effect" href="{{url_for('browse.abstract', arxiv_id=abs_meta.arxiv_id_v)}}">Back to Abstract</a>
       <a class="header-button hover-effect" href="{{url_for('.pdf', arxiv_id=abs_meta.arxiv_id_v)}}" target="_blank">Download PDF</a>
       <a class="ar5iv-toggle-color-scheme" href="javascript:toggleColorScheme()" title="Toggle dark/light mode">
