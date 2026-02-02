@@ -1,35 +1,9 @@
-var selectionAnchorNode;
-var bugReportState = {
-    initiateWay: null,
-    setInitiateWay: (value) => this.initiateWay = value,
-    getInitiateWay: () => this.initiateWay,
-    selectedHtml: null,
-    elementIdentifier: null,
-    setSelectedHtmlSRB: (value) => {
-        this.selectedHtml = "data:text/html;charset=utf-8," + encodeURIComponent(value.innerHTML);
-        this.elementIdentifier = value.id;
-    },
-    setSelectedHtmlSmallButton: (value) => {
-        const range = value.getRangeAt(0);
-        const container = document.createElement('div');
-        container.appendChild(range.cloneContents());
-        this.selectedHtml = 'data:text/html;charset=utf-8,' + encodeURIComponent(container.innerHTML);
-    },
-    getSelectedHtml: () => this.selectedHtml,
-    getElementIdentifier: () => this.elementIdentifier,
-    clear: () => {
-        this.selectedHtml = "undefined";
-        this.elementIdentifier = "undefined";
-        this.initiateWay = "undefined";
-    }
-};
-
 // similar to `initializeColorScheme`, but also updates the toggle button icons,
 // as the DOM is already loaded when this is called.
 function activateColorScheme() {
     let theme;
     let current_theme = localStorage.getItem("ar5iv_theme") || "automatic";
-    let colorSchemeToggle = document.querySelector('.ar5iv-toggle-color-scheme');
+    let colorSchemeToggle = document.querySelector('.color-tog');
     let autoIcon = document.querySelectorAll('.automatic-tog');
     let lightIcon = document.querySelectorAll('.light-tog');
     let darkIcon = document.querySelectorAll('.dark-tog');
@@ -41,20 +15,20 @@ function activateColorScheme() {
             theme = "light";
         }
         colorSchemeToggle.setAttribute('aria-label', 'System preference')
-        autoIcon.forEach(x => x.style.display = 'inline-block');
+        autoIcon.forEach(x => x.style.display = 'block');
         lightIcon.forEach(x => x.style.display = 'none');
         darkIcon.forEach(x => x.style.display = 'none');
     } else if (current_theme === "light") {
         colorSchemeToggle.setAttribute('aria-label', 'Light mode')
         autoIcon.forEach(x => x.style.display = 'none');
-        lightIcon.forEach(x => x.style.display = 'inline-block');
+        lightIcon.forEach(x => x.style.display = 'block');
         darkIcon.forEach(x => x.style.display = 'none');
         theme = "light";
     } else {
         colorSchemeToggle.setAttribute('aria-label', 'Dark mode')
         autoIcon.forEach(x => x.style.display = 'none');
         lightIcon.forEach(x => x.style.display = 'none');
-        darkIcon.forEach(x => x.style.display = 'inline-block');
+        darkIcon.forEach(x => x.style.display = 'block');
         theme = "dark";
     }
 
@@ -81,67 +55,16 @@ function toggleColorScheme() {
     activateColorScheme();
 }
 
-// Create SRButton that can open the report modal
-function addSRButton(modal) {
-
-    // Make SR button will only show in the main content area. Careful for id.
-    const contentDiv = document.querySelector('.ltx_page_content');
-    if (!contentDiv) {
-        console.error("Element with class 'ltx_page_content' not found.");
-        return [];
+function toggleNavTOC() {
+    const toc = document.querySelectorAll('.ltx_page_navbar>nav.ltx_TOC');
+    if (toc.length > 0) {
+        const style = window.getComputedStyle(toc[0]);
+        toc[0].style.display = (style.display === 'none') ? 'block' : 'none';
     }
-
-    const contents = contentDiv.querySelectorAll('p, svg, figure, .ltx_title, .ltx_authors');
-    const buttons = [];
-
-    // Get all the paragraphs in the document
-    // Add a hidden button after each paragraph
-    // Add a hidden button after each paragraph
-    contents.forEach((content, i) => {
-        if (content.classList.contains("header-message") || content.classList.contains("logomark")) return;
-
-        const button = document.createElement("button");
-        button.setAttribute("class", "sr-only button");
-        button.style.display = "none";
-        button.textContent = "Report issue for preceding element";
-
-        button.onfocus = () => previousFocusElement = document.activeElement;
-
-        button.onclick = (e) => {
-            /*
-                Comment: Need add a variable named initiateWay, so we can know how users initiate the report.
-
-                For addSRbutton, initiateWay = "srButton"
-                For smallReportButton, initiateWay = "smallButton"
-                For ShortCut, initiateWay = "ShortCut"
-                For click the button(right bi button) created in the modal, initiateWay = "FixedButton".
-
-                So you may need to create a global variable. I have checked showModal it cannot send any parameter to modal.
-            */
-            showModal(modal);
-            bugReportState.setSelectedHtmlSRB(content);
-            bugReportState.setInitiateWay("SRButton");
-            e.preventDefault();
-        };
-
-        // Insert the button after the paragraph
-        content.parentNode.insertBefore(button, content.nextSibling);
-
-        buttons.push(button);
-    });
-
-    return buttons;
 }
 
+
 function showModal(modal) {
-    const theme = document.documentElement.getAttribute("data-theme");
-    const modalHeader = document.getElementById("modal-header");
-    if (theme === 'dark') {  
-        modalHeader.setAttribute('data-bs-theme', "dark");
-    }else{
-        modalHeader.setAttribute('data-bs-theme', "light");
-    }
-        
     modal.style.display = 'block';
     modal.setAttribute('tabindex', '-1'); // Ensure the modal is focusable
     modal.focus();
@@ -151,102 +74,14 @@ function hideModal(modal) {
     modal.style.display = 'none';
 }
 
-function showButtons(buttons) {
-    // buttons.forEach((button) => {
-    //     console.log(button);
-    //     console.log(button.style.display);
-    //     button.style.display === 'none' ?
-    //         button.style.display = 'inline' :
-    //         button.style.display = 'none';
-    // })
-    buttons.forEach((button) => button.style.display = 'inline');
-}
-
-function hideButtons(buttons) {
-    buttons.forEach((button) => button.style.display = 'none');
-}
-
 // Code for handling key press to open/close modal
-const handleKeyDown = (e, modal, buttons) => {
+const handleKeyDown = (e, modal) => {
     const ctrlOrMeta = e.metaKey || e.ctrlKey;
-
-    // if(e.key === '¥'){
-    //     showButtons(buttons);
-    // } else if (e.key === 'Á'){
-    //     hideButtons(buttons)
-    // }
-    if (e.altKey && e.code === 'KeyY' && !ctrlOrMeta) {
-        e.shiftKey ? hideButtons(buttons) : showButtons(buttons);
-    } else if (ctrlOrMeta && (e.key === '/' || e.key === '?')) {
+    if (ctrlOrMeta && (e.key === '/' || e.key === '?')) {
         showModal(modal)
-        bugReportState.setInitiateWay("ShortCut");
     } else if (ctrlOrMeta && (e.key === '}' || e.key === ']')) {
         hideModal(modal);
     }
-}
-
-//The highlight initiation way
-function handleMouseUp(e, smallButton) {
-    if (e.target.id === "small-report-button")
-        return;
-    if (!window.getSelection().isCollapsed) {
-        selection = window.getSelection();
-        currentAnchorNode = selection.anchorNode;
-        bugReportState.setSelectedHtmlSmallButton(selection);
-        // var range = selection.getRangeAt(0);
-        // var container = document.createElement('div');
-        // container.appendChild(range.cloneContents());
-        // // Use the selected text to generate the dataURI
-        // selectedHtml = 'data:text/html;charset=utf-8,' + encodeURIComponent(container.innerHTML);
-        //Comment: Need to get the selected text and pass it to the backend
-        //reference: var selectedhtml in app.js
-        showSmallButton(smallButton);
-    } else hideSmallButton(smallButton);
-}
-
-function createSmallButton(modal) {
-    const smallReportButton = document.createElement('button');
-    smallReportButton.id = 'small-report-button';
-    smallReportButton.type = 'button';
-    smallReportButton.className = 'btn btn-secondary btn-sm';
-    smallReportButton.style.backgroundColor = '#b31b1b';
-    smallReportButton.textContent = 'Report Issue for Selection';
-    smallReportButton.style.position = 'fixed';
-
-    document.body.appendChild(smallReportButton);
-
-    smallReportButton.onclick = (e) => {
-        document.getElementById('selectedTextModalDescription').style.display = 'block';
-        document.getElementById('normalModalDescription').style.display = 'none';
-        showModal(modal); // do something with window.getSelection()
-        bugReportState.setInitiateWay("selectedText-smallButton");
-    }
-
-    smallReportButton.addEventListener("focusout", function (e) {
-        hideSmallButton(this);
-    });
-
-    return smallReportButton;
-}
-
-// Display the smallButton for bug report, click and scroll included
-function showSmallButton(smallReportButton) {
-    selection = window.getSelection();
-
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-
-    smallReportButton.style.left = `${rect.left + rect.width / 2}px`;
-
-    // Check if there is enough space above the selected text
-    smallReportButton.style.top = `${rect.top}px`;
-    smallReportButton.style.transform = 'translate(-50%, -100%)';
-
-    smallReportButton.style.display = 'inline';
-}
-
-function hideSmallButton(smallReportButton) {
-    smallReportButton.style.display = 'none';
 }
 
 //submit to the backend, next step: finish
@@ -493,10 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // normalDescriptionLabel.style.display = 'block';
     }
 
-    const reportButtons = addSRButton(modal);
-    const smallReportButton = createSmallButton(modal);
-
-    document.onkeydown = (e) => handleKeyDown(e, modal, reportButtons);
+    document.onkeydown = (e) => handleKeyDown(e, modal);
     document.onclick = (e) => {
         handleClickOutsideModal(e, modal);
         if(window.innerWidth <= 719){
@@ -506,20 +338,11 @@ document.addEventListener("DOMContentLoaded", () => {
             handleClickTOCToggle(e);
         }
     }
-
-    document.onmouseup = (e) => handleMouseUp(e, smallReportButton);
-    document.ontouchend = (e) => handleMouseUp(e, smallReportButton);
+    // TODO: Add stable logic to capture the selection when clicking on the singleton "Report issue" button.
+    // document.onmouseup = (e) => handleMouseUp(e, smallReportButton);
+    // document.ontouchend = (e) => handleMouseUp(e, smallReportButton);
 
     let lastScrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
-    window.addEventListener('scroll', () => {
-        const currentScrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
-        if (currentScrollPosition > lastScrollPosition || currentScrollPosition < lastScrollPosition) {
-            smallReportButton.style.display = "none";
-        } else {
-            smallReportButton.style.display = "block";
-        }
-        lastScrollPosition = currentScrollPosition;
-    });
 
     document.getElementById('modalFormContent').onsubmit = submitBugReport;
 

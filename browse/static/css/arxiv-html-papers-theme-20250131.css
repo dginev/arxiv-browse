@@ -23,6 +23,7 @@
     /* warm wash */
     --note-highlight-color: #f9f7f7;
     /* Cornell Red */
+    --header-background-color: #b31b1b;
     --toc-text-highlight-color: #b31b1b;
     /* Archival Blue */
     --inpage-text-highlight-color: #1f5e96;
@@ -35,6 +36,7 @@
     --background-color: #ffffff;
     /* warm wash */
     --header-text-color: #f9f7f7;
+    --header-hover-color: black;
     /* lighter Library Grey */
     --secondary-text-color: #7D7568;
     /*warm wash to white*/
@@ -51,6 +53,8 @@
   [data-theme=dark] {
     /* warm grey */
     --note-highlight-color: #6b6459;
+    /* Cornell Red */
+    --header-background-color: #b31b1b;
     /* Open Blue */
     --toc-text-highlight-color: #a5d6fe;
     --inpage-text-highlight-color: #a5d6fe;
@@ -64,6 +68,7 @@
     --rp-button-hover-color: #fb595a;
     /* warm wash */
     --header-text-color: #f9f7f7;
+    --header-hover-color: black;
     /* darker warm wash */
     --secondary-text-color: #ADA4A4;
     /*darker shade to background*/
@@ -89,21 +94,32 @@
 
 /* Styling the branded arXiv header */
 @layer header {
-  .mob_header {
-    display: none;
-  }
-
-  header {
-    position: sticky;
-    background-color: #b31313;
+  header.arxiv-html-header {
+    background-color: var(--header-background-color);
     display: flex;
     top: 0;
     width: 100%;
     justify-content: space-between;
-    padding: .5em 4em;
     align-items: center;
     user-select: none;
     box-sizing: border-box;
+    z-index: 2;
+  }
+  @media only screen and (min-width: 1280px) {
+    header.arxiv-html-header {
+      position: sticky;
+      padding: .5em 4em;
+    }
+  }
+  @media only screen and (max-width: 1279px) {
+    header.arxiv-html-header {
+      position: fixed;
+      padding-bottom: 0;
+      padding-top: 0;
+      gap: .75em;
+      padding-right: 3em;
+      padding-left: 3em;
+    }
   }
 
   header a:hover {
@@ -131,23 +147,36 @@
   body:after {
     content: "beta";
     position: fixed;
-    z-index: 1070;
-    width: 72px;
-    height: 24px;
-    background: #fb595a;
-    top: 7px;
-    left: -20px;
+    z-index: 2;
+    background: var(--rp-button-hover-color);
     text-align: center;
     font-size: 0.8rem;
     letter-spacing: 1px;
     font-family: sans-serif;
     text-transform: uppercase;
     font-weight: bold;
-    color: black;
-    line-height: 27px;
+    color: var(--header-text-color);
     -ms-transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
     transform: rotate(-45deg);
+  }
+  @media only screen and (min-width: 1280px) {
+    body:after {
+      width: 4.5rem;
+      height: 1.5rem;
+      top: 0.5rem;
+      left: -1.25rem;
+      line-height: 1.75rem;
+    }
+  }
+  @media only screen and (max-width: 1279px) {
+    body:after {
+      width: 4.2rem;
+      height: 1rem;
+      top: 0.5rem;
+      left: -1rem;
+      line-height: 1.2rem;
+    }
   }
 
   /*will display to screen readers, but not be visible to sighted users*/
@@ -160,12 +189,6 @@
     overflow: hidden;
   }
   /* Build for header */
-  header.desktop_header {
-    z-index: 2;
-    display: flex;
-    justify-content: space-between;
-  }
-
   header .html-header-logo .logo,
   header .html-header-logo .logomark {
     background-color: transparent;
@@ -185,7 +208,7 @@
   }
 
   header .html-header-message a:hover {
-    color: var(--header-text-color);
+    color: var(--header-hover-color);
   }
 
   header .html-header-nav {
@@ -200,7 +223,7 @@
 
   header .html-header-nav a:hover {
     text-decoration: none;
-    color: black !important;
+    color: var(--header-hover-color);
   }
 
   header .html-header-nav a span {
@@ -214,30 +237,25 @@
   }
 
   header .html-header-nav svg {
-    fill: white;
+    fill: var(--header-text-color);
     background: transparent;
   }
 
   header .html-header-nav svg:hover {
-    fill: black;
+    fill: var(--header-hover-color);
     text-decoration: none;
   }
 
-  header.mob_header .html-header-nav {
-    gap: 15%;
-  }
-
   .logo {
-    background-color: transparent !important;
+    background-color: transparent;
     max-height: 2em;
   }
 
   #back-arrow {
-    background-color: transparent !important;
+    background-color: transparent;
   }
 
   .toggle-icon {
-    color: currentColor;
     cursor: pointer;
   }
 
@@ -248,12 +266,8 @@
     width: 1.2rem;
   }
 
-  .ar5iv-toggle-color-scheme {
+  .color-tog {
     text-decoration: none;
-    display: block;
-    float: left;
-    padding: 0.5rem;
-    margin-top: 0.1rem;
     color: transparent;
     text-shadow: 0 0 0 var(--header-text-color);
   }
@@ -301,20 +315,48 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     .ltx_page_navbar {
       position: sticky;
       top: 10vh;
+      height: 90vh;
       margin-right: 1rem;
-      height: 100vh;
-      z-index: 2;
       user-select: none;
     }
     .ltx_page_navbar>nav.ltx_TOC {
+      position: sticky;
       width: 100%;
+      max-height: 90vh;
+      display: block;
       overflow-y: auto;
       color: var(--text-color);
     }
   }
   @media only screen and (max-width: 1279px) {
-    .ltx_page_navbar, nav.ltx_TOC {
+    .ltx_page_navbar {
+      z-index: 2;
+      position: fixed;
+      top: 2.8rem;
+      margin-top: 0;
+      right: 0;
+      min-width: 20rem;
+      max-width: 40rem;
+      height: 90vh;
+      user-select: none;
+    }
+    .ltx_page_navbar>nav.ltx_TOC {
       display: none;
+      width: 100%;
+      margin-top: 0;
+      margin-right: 1rem;
+      overflow-y: auto;
+      color: var(--text-color);
+      background-color: var(--background-color);
+      border: solid var(--header-background-color) 1px;
+      max-height: 90vh;
+    }
+    .ltx_toclist {
+      margin-left: 0;
+      padding-inline-start: 0;
+    }
+    .ltx_tocentry {
+      padding-bottom: 1rem;
     }
   }
 
@@ -356,12 +398,13 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     background-color: var(--note-highlight-color);
   }
 
-  .navbar-toggler:focus {
+  .navbar-tog:focus {
     box-shadow: none;
   }
-
-  [data-bs-theme=dark] .navbar-toggler-icon {
-    --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='1em' viewBox='0 0 448 512'%3E%3Cstyle%3Esvg%7Bfill%3A%23fdf7f7%7D%3C/style%3E%3Cpath d='M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z'/%3E%3C/svg%3E");
+  .navbar-tog {
+    background: transparent;
+    border: none;
+    margin-top: 0.2rem;
   }
 
   :target {
@@ -372,7 +415,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 /* Styling related to the "report issue" feature */
 @layer ui-report-issue {
   #modal-submit {
-    background-color: #b31b1b;
+    background-color: var(--header-background-color);
     border-color: #690604;
   }
 
@@ -386,20 +429,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   .modal-title,
   textarea.form-control {
     font-family: var(--other-font-family);
-  }
-  button.feedback-button {
-    position: fixed;
-    bottom: 1em;
-    left: 1em;
-    margin-bottom: 0;
-    margin-top: 0.05em;
-    background-color: #a5d6fe;
-    color: black;
-    padding: .5em 1em;
-    border-radius: .5em;
-    font-size: 1.1em;
-    font-weight: bold;
-    box-shadow: 1px 1px 6px 0.05px grey;
   }
 
   .close-icon {
@@ -416,7 +445,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   }
 
   .modal-submit:hover {
-    background-color: #b31b1b;
+    background-color: var(--header-background-color);
     width: 100px;
   }
 
@@ -426,25 +455,8 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     max-height: 400px;
   }
 
-  #openForm,
-  #small-report-button {
-    font-size: 20px;
-    background-color: #b31b1b;
-    border-color: var(--secondary-text-color);
-  }
-  #openForm {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-  }
-  #small-report-button { 
-    display: none; 
-  }
-
   /* Hover for openForm */
   @media (min-width: 1280px) {
-
-    #openForm:hover,
     #modal-submit:hover,
     small-report-button:hover {
       text-decoration: none;
@@ -454,7 +466,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   }
 
   @media (max-width: 1279px) {
-    #openForm:active,
     #modal-submit:active,
     small-report-button:hover {
       text-decoration: none;
@@ -536,7 +547,8 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   .ar5iv-footer-button {
     color: var(--link-text-color);
   }
-  .ar5iv-footer-button, .header-button {
+  .ar5iv-footer-button, 
+  .header-button {
     font-size: 1rem;
     font-family: var(--other-font-family);
     padding: 0.5rem;
@@ -639,7 +651,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     margin-left: 1em;
     margin-bottom: 1em;
     border: 1px solid #970503;
-    background-color: #b31b1b;
+    background-color: var(--header-background-color);
     border-radius: 7px;
     padding: 0.1em 0.25em 0.25em 0.25em;
     transition: background-color .2s ease-in-out;
@@ -657,8 +669,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   .package-alerts a {
     color: var(--error-link-color) !important;
   }
-
-
 }
 
 /* Styling related to the "back from reference" feature */
@@ -712,9 +722,16 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 
 @layer responsive-layout {
   @media (min-width: 1280px) {
+    .mobile-only {
+      display: none;
+    }
+    .desktop-only {
+      display: block;
+    }
+
     html { margin: 0; }
     body {
-      width: 100vw;
+      width: 100%;
       margin: 0;
       display: grid;
       grid-template-columns:
@@ -732,8 +749,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 
       justify-content: normal;
     }
-    body > header.desktop_header { grid-area: header;  contain: layout; }
-    body > header.mob_header     { grid-area: header;  contain: layout; }
+    body > header.arxiv-html-header { grid-area: header;  contain: layout; }
     body > nav.ltx_page_navbar   { grid-area: nav;     contain: layout; }
     div.ltx_page_main            { grid-area: article; contain: layout; }
     footer#footer                { grid-area: footer;  contain: layout; } 
@@ -741,6 +757,12 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 
   /*mobile*/
   @media only screen and (max-width: 1279px) {
+    .mobile-only {
+      display: block;
+    }
+    .desktop-only {
+      display: none;
+    }
     .ltx_note>.ltx_note_mark {
       font-size: 1.2em;
       padding: 0.5rem;
@@ -783,12 +805,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
       margin-bottom: 8vh;
     }
 
-    header {
-      gap: .75em;
-      padding-right: 3em;
-      padding-left: 3em;
-    }
-
     .header-message {
       max-width: 100%;
       display: none;
@@ -825,21 +841,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
       display: none;
     }
 
-    .ltx_toclist {
-      margin-top: 2.5rem;
-      padding-top: 2rem;
-      display: block !important;
-    }
-
-    header.mob_header {
-      display: flex;
-      position: absolute;
-      z-index: 2;
-    }
-
-    header.desktop_header {
-      display: none;
-    }
   }
 }
 
