@@ -48,6 +48,10 @@
     /* dark red */
     --error-text-color: #970503;
     --nav-width: minmax(14rem, 25rem);
+
+    --form-border-width: 1px;
+    --form-border-color: var(--text-color);
+    --form-border-radius: 4px;
   }
 
   [data-theme=dark] {
@@ -79,6 +83,10 @@
     --error-link-color: #176992;
     /* dark red */
     --error-text-color: #970503;
+
+    --form-input-color: #c9d1d9;
+    --form-input-background-color: #0d1117;
+
   }
 
   /* Special hand-crafted case: \color{black} is the most common use, so hand-curate to match
@@ -414,28 +422,76 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 
 /* Styling related to the "report issue" feature */
 @layer ui-report-issue {
+  #modal-form {
+      border: none;
+      border-radius: 8px;
+      margin: 8rem auto 0 auto;
+      width: calc(var(--main-width) - 2rem);
+      color: var(--text-color);
+      background-color: var(--background-color);
+
+      &::backdrop {
+        background-color: color-mix(in srgb, var(--background-color), transparent 20%);
+        backdrop-filter: blur(0.1rem); /* This makes the background content blurry */
+      }
+
+      /* Target the modal only when it's open */
+      &:modal {
+          animation: fadeIn 0.3s ease-out;
+      }
+  }
+
+  @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    padding-left: 1rem;
+  }
+  .modal-form-content {
+    border: var(--form-border-size) solid var(--form-border-color);
+    border-radius: var(--form-border-radius);
+  }
+
   #modal-submit {
     background-color: var(--header-background-color);
     border-color: #690604;
   }
 
-  .btn {
-    font-family: var(--other-font-family);
-  }
-  .form-text {
-    font-family: var(--other-font-family);
-  }
-
+  .form-text,
   .modal-title,
-  textarea.form-control {
+  .form-control {
     font-family: var(--other-font-family);
   }
-
-  .close-icon {
-    position: relative;
-    top: -10px;
-    right: -99%;
+  .modal-title {
+    font-size: 1.25rem;
+    display: inline-block;
   }
+
+  .form-control {
+    display: block;
+    width: calc(100% - 1rem);
+    padding: .375rem .75rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--form-input-color);
+    background-color: var(--form-input-background-color);
+    background-clip: padding-box;
+    border: var(--form-border-width) solid var(--form-border-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: var(--form-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  }
+  .form-control::placeholder {
+    color: var(--form-input-color);
+    background-color: var(--form-input-background-color);
+  }
+
   /* Submit button */
   .modal-submit {
     background-color: #595151;
@@ -455,57 +511,41 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     max-height: 400px;
   }
 
-  /* Hover for openForm */
-  @media (min-width: 1280px) {
-    #modal-submit:hover,
-    small-report-button:hover {
-      text-decoration: none;
-      background-color: var(--rp-button-hover-color);
-      color: black;
-    }
-  }
-
-  @media (max-width: 1279px) {
-    #modal-submit:active,
-    small-report-button:hover {
-      text-decoration: none;
-      background-color: var(--rp-button-hover-color);
-      color: black;
-    }
-  }
-  /* Modal hidden until triggered */
-  .modal {
-    display: none; 
-  }
   /* Modal Content/Box */
-    [data-theme=light] .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    /*width: 50%; /* Could be more or less, depending on screen size */
-  }
-
-  [data-theme=dark] .modal-content {
-    background-color: #0d1117;
-    margin: 15% auto;
-    /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #c9d1d9;
+  .modal-body {
+    padding: 1rem;
+    border-top: var(--form-border-size) solid var(--form-border-color);
+    border-bottom: var(--form-border-size) solid var(--form-border-color);
   }
 
   /* Close button */
-  .close {
-    color: #aaa;
+  .modal-close {
+    --bs-btn-close-color: var(--text-color);
+    --bs-btn-close-bg: url(data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e);
+    --bs-btn-close-opacity: 0.5;
+    --bs-btn-close-hover-opacity: 0.75;
+    --bs-btn-close-focus-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    --bs-btn-close-focus-opacity: 1;
+    --bs-btn-close-disabled-opacity: 0.25;
+    --bs-btn-close-white-filter: invert(1) grayscale(100%) brightness(200%);
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: .25em .25em;
+    color: var(--bs-btn-close-color);
+    background: transparent var(--bs-btn-close-bg) center / 1em auto no-repeat;
+    border: 0;
+    border-radius: .375rem;
+    opacity: var(--bs-btn-close-opacity);
+
     float: right;
-    font-size: 28px;
+    font-size: 1.5rem;
     font-weight: bold;
   }
 
-  .close:hover,
-  .close:focus {
-    color: black;
+  .modal-close:hover,
+  .modal-close:focus {
+    color: var(--link-hover-color);
     text-decoration: none;
     cursor: pointer;
   }
@@ -520,30 +560,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   }
 
-  [data-theme=dark] .form-control:focus {
-    color: #c9d1d9;
-    background-color: #0d1117;
-  }
-
-  [data-theme=dark] .form-control {
-    background-color: #0d1117;
-    color: #c9d1d9;
-    /* Add additional styles as needed */
-  }
-
-  [data-theme=dark] .form-control::placeholder {
-    color: #c9d1d9;
-  }
-
-  [data-theme=dark] .btn.btn-primary {
-    color: var(--text-color);
-    border-color: var(--text-color);
-  }
-
-  [data-theme=dark] .btn.btn-outline-secondary#take-screenshot {
-    color: #c9d1d9;
-    border-color: #c9d1d9;
-  }
   .ar5iv-footer-button {
     color: var(--link-text-color);
   }
@@ -599,15 +615,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     box-sizing: border-box;
     width: 100%;
   }
-  /* Write new CSS which force in-line-color to follow root color. */
-  [data-theme=dark] .ltx_table .ltx_text {
-    color: var(--text-color) !important;
-  }
 
-  [data-theme=dark] .ltx_TOC {
-    background-color: var(--background-color);
-    color: #c9d1d9;
-  }
 }
 
 /* Styling the infobox containing license, date and other arXiv metadata.  */
@@ -631,43 +639,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     text-align: center;
     color: var(--secondary-text-color);
     font-family: var(--toc-font-family);
-  }
-
-  .package-alerts {
-    display: block;
-    background-color: var(--error-background-color);
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--error-text-color);
-    color: var(--error-text-color);
-    border-radius: 1em;
-    font-size: .9em;
-    padding: 1em;
-    margin-bottom: 2em;
-  }
-
-  .package-alerts button {
-    float: right;
-    margin-left: 1em;
-    margin-bottom: 1em;
-    border: 1px solid #970503;
-    background-color: var(--header-background-color);
-    border-radius: 7px;
-    padding: 0.1em 0.25em 0.25em 0.25em;
-    transition: background-color .2s ease-in-out;
-  }
-
-  .package-alerts button svg {
-    background-color: transparent;
-    fill: #ffffff;
-  }
-
-  .package-alerts button:hover {
-    background-color: #fb595a;
-  }
-
-  .package-alerts a {
-    color: var(--error-link-color) !important;
   }
 }
 
@@ -854,10 +825,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     footer,
     body::after,
     .ltx_page_footer,
-    .ltx_page_main>.ltx_TOC.flex,
-    .back-to-reference-btn,
-    #small-report-button,
-    #openForm {
+    .back-to-reference-btn {
       display: none;
     }
 

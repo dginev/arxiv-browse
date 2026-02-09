@@ -24,25 +24,29 @@
       <p>Our team has already identified <a class="ltx_ref" href="https://github.com/arXiv/html_feedback/issues" target="_blank">the following issues</a>. We appreciate your time reviewing and reporting rendering errors we may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability should not be a barrier to accessing research. Thank you for your continued support in championing open access for all.</p>
       <p>Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/wiki/Porting-LaTeX-packages-for-LaTeXML" target="_blank">list of packages that need conversion</a>, and welcome <a class="ltx_ref" href="https://github.com/brucemiller/LaTeXML/issues" target="_blank">developer contributions</a>.</p>
   </div>
-  <div class="modal" id="modalForm" role="dialog" aria-labelledby="modal-title">
-    <div class="modal-dialog">
-        <form class="modal-content" id="modalFormContent" enctype="multipart/form-data">
-            <div class="modal-header" id="modal-header">
-                <h5 class="modal-title">Report Github Issue</h5>
-                <button type="button" id="modal-close" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <label for="form_title" id="modalTitle">Title:</label>
-                <input class="form-control" id="form_title" name="form_title" required="required" placeholder="Enter title">
-                <label for="description" id="selectedTextModalDescription" style="display: none;">Content selection saved. Describe the issue below:</label>
-                <label for="description" id="nomralModalDescription">Description:</label>
-                <textarea class="form-control" id="description" name="description" required="required" style="height: 80px;" maxlength="500" placeholder="500 characters maximum"></textarea>
-            </div>
-            <div class="modal-footer d-flex justify-content-end">
-                <button type="submit" class="sr-only button" id="modal-submit-sr">Submit without Github</button>
-                <button type="submit" class="btn btn-primary" id="modal-submit">Submit in Github</button>
-            </div>
-        </form>
-    </div>
-  </div>
+  <dialog id="modal-form" aria-labelledby="modal-title" closedby="any">
+    <form id="modal-form-content" method="dialog" enctype="multipart/form-data">
+       
+        <header class="modal-header">
+            <h5 id="modal-title" class="modal-title">Report Github Issue</h5>
+            <button type="submit" formnovalidate class="modal-close" aria-label="Close">×</button>
+        </header>
+
+        <div class="modal-body">
+            <label for="form_title">Title:</label>
+            <input class="form-control" id="form_title" name="form_title" required placeholder="Enter title">
+
+            <p id="selectedTextModalDescription" hidden>Content selection saved. Describe the issue below:</p>
+            
+            <label for="description">Description:</label>
+            <textarea class="form-control" id="description" name="description" required maxlength="500" placeholder="500 characters maximum"></textarea>
+        </div>
+
+        <footer class="modal-footer">
+            <button type="submit" value="local" class="sr-only modal-submit">Submit without Github</button>
+            <button type="submit" value="github" class="modal-submit">Submit in Github</button>
+        </footer>
+        
+    </form>
+  </dialog>
 </footer>

@@ -1,3 +1,29 @@
+var selectionAnchorNode;
+var bugReportState = {
+    initiateWay: null,
+    setInitiateWay: (value) => this.initiateWay = value,
+    getInitiateWay: () => this.initiateWay,
+    selectedHtml: null,
+    elementIdentifier: null,
+    setSelectedHtmlSRB: (value) => {
+        this.selectedHtml = "data:text/html;charset=utf-8," + encodeURIComponent(value.innerHTML);
+        this.elementIdentifier = value.id;
+    },
+    setSelectedHtmlSmallButton: (value) => {
+        const range = value.getRangeAt(0);
+        const container = document.createElement('div');
+        container.appendChild(range.cloneContents());
+        this.selectedHtml = 'data:text/html;charset=utf-8,' + encodeURIComponent(container.innerHTML);
+    },
+    getSelectedHtml: () => this.selectedHtml,
+    getElementIdentifier: () => this.elementIdentifier,
+    clear: () => {
+        this.selectedHtml = "undefined";
+        this.elementIdentifier = "undefined";
+        this.initiateWay = "undefined";
+    }
+};
+
 // similar to `initializeColorScheme`, but also updates the toggle button icons,
 // as the DOM is already loaded when this is called.
 function activateColorScheme() {
@@ -64,23 +90,21 @@ function toggleNavTOC() {
 }
 
 
-function showModal(modal) {
-    modal.style.display = 'block';
-    modal.setAttribute('tabindex', '-1'); // Ensure the modal is focusable
-    modal.focus();
+function showModalForm() {
+    const modal = document.getElementById('modal-form');
+    if (modal) {
+        modal.showModal();
+    } else {
+        console.error('Modal element with id "modal-form" not found.');
+    }
 }
 
-function hideModal(modal) {
-    modal.style.display = 'none';
-}
-
-// Code for handling key press to open/close modal
-const handleKeyDown = (e, modal) => {
-    const ctrlOrMeta = e.metaKey || e.ctrlKey;
-    if (ctrlOrMeta && (e.key === '/' || e.key === '?')) {
-        showModal(modal)
-    } else if (ctrlOrMeta && (e.key === '}' || e.key === ']')) {
-        hideModal(modal);
+function hideModalForm() {
+    const modal = document.getElementById('modal-form');
+    if (modal) {
+        modal.close();
+    } else {
+        console.error('Modal element with id "modal-form" not found.');
     }
 }
 
@@ -111,9 +135,8 @@ function submitBugReport(e) {
     // Relevant Selection
     let elementIdentifier = bugReportState.getElementIdentifier();
     let topLayer = 'Unknown';
-    console.log(currentAnchorNode);
-    if (currentAnchorNode !== null) {
-        const parentNode = currentAnchorNode.parentNode;
+    if (selectionAnchorNode) {
+        const parentNode = selectionAnchorNode.parentNode;
         const id = parentNode.id;
         const classList = parentNode.classList;
         //if there is no id, than use class to identify
@@ -167,51 +190,9 @@ function submitBugReport(e) {
         window.open(url, '_blank');
     } 
 
-    document.querySelector('#modalFormContent').reset();
+    document.querySelector('#modal-form-content').reset();
     bugReportState.clear();
-    hideModal(document.getElementById('modalForm'));
-}
-
-function handleClickOutsideModal(e, modal) {
-    if (e.target == modal)
-        modal.style.display = 'none';
-}
-
-function handleClickTOCToggle(e) {
-    const listIcon= document.getElementById('listIcon');
-    const arrowIcon= document.getElementById('arrowIcon');
-    const toc = document.querySelector('.ltx_toclist');
-    const toc_main = document.querySelector('.ltx_page_main>.ltx_TOC');
-    // const content=document.querySelector('.ltx_page_content');
-    if (e.target == listIcon) {
-        //show toc and arrowIcon
-        toc.classList.remove('hide');
-        // toc.classList.add('show');
-        arrowIcon.classList.remove('hide');
-        // arrowIcon.classList.add('show');
-        listIcon.classList.add('hide');
-        toc_main.classList.add('active')
-        // listIcon.classList.remove('show');
-        // toc_main.style.backgroundColor = 'var(--background-color)';
-        //change 
-        /*toc_main.style.flex='1';
-        content.style.flex='5';*/
-        // toc_main.style.flex = '1 0 20%';  // This means it will start with 20% of the parent width but won't grow or shrink.
-        // content.style.flex = '1 1 80%';  // This will make it take the remaining 80% but allows it to adjust as needed.
-    }
-    if (e.target == arrowIcon) {
-        //hide toc and arrowIcon
-        toc.classList.add('hide');
-        // toc.classList.remove('show');
-        arrowIcon.classList.add('hide');
-        // arrowIcon.classList.remove('show');
-        listIcon.classList.remove('hide');
-        toc_main.classList.remove('active');
-        // listIcon.classList.add('show');
-        // toc_main.style.backgroundColor = 'transparent';
-        // toc_main.style.flex='0 0 3rem';
-        // content.style.flex='1 1 100%';
-    }
+    hideModalForm();
 }
 
 function postToDB(issueData) {
@@ -239,7 +220,7 @@ function makeGithubBody(issueData) {
 }
 
 function testForGitHubIssue(issueData, arxivIdv, formTitle, fullUrl){
-    var url = `https://github.com/arXiv/html_feedback/issues/new?assignees=&labels=&projects=&title= ${formTitle}&template=Feedback_about_HTML_formatted_papers.yml`;
+    var url = `https://github.com/arXiv/html_feedback/issues/new?assignees=&labels=&projects=&title=${formTitle}&template=Feedback_about_HTML_formatted_papers.yml`;
     url += `&description=${issueData.description}`;
     url += `&uniqueId=${issueData.uniqueId}`;
     url += `&arxivId=${arxivIdv}`;
@@ -248,8 +229,6 @@ function testForGitHubIssue(issueData, arxivIdv, formTitle, fullUrl){
     url += `&fullUrl=${fullUrl}`;
     // device type
     url += `&deviceType=${getDeviceType()}`;
-    // https://browse.arxiv.org/latexml/2308.06262v1/2308.06262v1.html
-
     return url;
 }
 
@@ -279,73 +258,14 @@ function getDeviceType() {
     return 'Desktop';
 }
 
-
-
-
-function handleClickMobileTOC(e){
-    const tocItems = document.querySelectorAll('.ltx_ref');
-    const toc = document.querySelector('.ltx_page_main >.ltx_TOC.mobile')
-    // //const toggle=document.getElementById('navbar-mobile-toggler')
-    // const toggle=document.querySelector('.navbar-toggler-icon');
-
-    // if(e.target==toggle){
-    //     if(toc.classList.contains('show')){
-    //         //toc.setAttribute('display','none');
-    //         //toc.style.setProperty('display','none','important');
-    //         toc.classList.add('hide');
-    //         toc.classList.remove('show');
-    //     }
-    //     else{
-    //         //toc.setAttribute('display','block');
-    //         //toc.style.setProperty('display','block','important');
-    //         toc.classList.remove('hide');
-    //         toc.classList.add('show');
-    //     }
-    // }
-    tocItems.forEach(item => {
-        item.addEventListener('click', () => {
-            toc.classList.remove('show');
-        });
-    });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-
-    // TODO: Reactivate using template scaffold:
     const is_submission = window.location.pathname.split('/')[2] === 'submission';
-    const button = document.getElementById('openForm');
-    const modal = document.getElementById('modalForm');
-    button.onclick = (e) => {
-       currentAnchorNode = null;
-       showModal(modal, 'button');
-       bugReportState.setInitiateWay("Fixedbutton");
-    };
-    const closeButton = document.getElementById('modal-close');
-    closeButton.onclick = (e) => {
-        
-        hideModal(modal);
-        // selectedTextDescriptionLabel.style.display = 'none';
-        // normalDescriptionLabel.style.display = 'block';
-    }
-
-    document.onkeydown = (e) => handleKeyDown(e, modal);
-    document.onclick = (e) => {
-        handleClickOutsideModal(e, modal);
-        if(window.innerWidth <= 719){
-            handleClickMobileTOC(e);
-        }
-        else{
-            handleClickTOCToggle(e);
-        }
-    }
-    // TODO: Add stable logic to capture the selection when clicking on the singleton "Report issue" button.
-    // document.onmouseup = (e) => handleMouseUp(e, smallReportButton);
-    // document.ontouchend = (e) => handleMouseUp(e, smallReportButton);
-
-    let lastScrollPosition = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
-
-    document.getElementById('modalFormContent').onsubmit = submitBugReport;
-
-    activateColorScheme();
-    
+    document.getElementById('modal-form-content').onsubmit = submitBugReport;
+    const content = document.querySelector('.ltx_page_content');
+    content.addEventListener('mouseup', function() {
+        const selection = window.getSelection();
+        selectionAnchorNode = selection.anchorNode;
+        var text=selection.toString();
+        if (text!='') alert(text);
+    });
 });
