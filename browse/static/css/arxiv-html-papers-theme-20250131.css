@@ -152,10 +152,11 @@
   }
 
   /*BETA corner banner*/
-  body:after {
+  #beta-badge {
     content: "beta";
     position: fixed;
     z-index: 2;
+    color: var(--header-text-color);
     background: var(--rp-button-hover-color);
     text-align: center;
     font-size: 0.8rem;
@@ -163,13 +164,12 @@
     font-family: sans-serif;
     text-transform: uppercase;
     font-weight: bold;
-    color: var(--header-text-color);
     -ms-transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
     transform: rotate(-45deg);
   }
   @media only screen and (min-width: 1280px) {
-    body:after {
+    #beta-badge {
       width: 4.5rem;
       height: 1.5rem;
       top: 0.5rem;
@@ -178,7 +178,7 @@
     }
   }
   @media only screen and (max-width: 1279px) {
-    body:after {
+    #beta-badge {
       width: 4.2rem;
       height: 1rem;
       top: 0.5rem;
@@ -263,24 +263,13 @@
     background-color: transparent;
   }
 
-  .toggle-icon {
-    cursor: pointer;
-  }
-
-  .toggle-icon>svg {
-    fill: currentcolor;
-    display: block;
-    height: 1.2rem;
-    width: 1.2rem;
-  }
-
   .color-tog {
     text-decoration: none;
     color: transparent;
     text-shadow: 0 0 0 var(--header-text-color);
   }
   .automatic-tog {
-    display: visible;
+    display: block;
   }
   .light-tog, .dark-tog {
     display: none;
@@ -368,6 +357,9 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     }
   }
 
+  /* We want to hide the main ToC, in favour of the navigational sidebar ToC, but...
+  /* See arXiv:2410.14453v1 for a ToC inside a section that should remain visible,
+       to avoid leaving an awkward gap in the main article content. */
   :not(.ltx_page_navbar)>nav.ltx_TOC {
     display: none;
   }
@@ -406,10 +398,8 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     background-color: var(--note-highlight-color);
   }
 
-  .navbar-tog:focus {
-    box-shadow: none;
-  }
-  .navbar-tog {
+  .toggle-icon {
+    cursor: pointer;
     background: transparent;
     border: none;
     margin-top: 0.2rem;
@@ -423,8 +413,8 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 /* Styling related to the "report issue" feature */
 @layer ui-report-issue {
   #modal-form {
-      border: none;
-      border-radius: 8px;
+      border: var(--form-border-width) solid var(--form-border-color);
+      border-radius: var(--form-border-radius);
       margin: 8rem auto 0 auto;
       width: calc(var(--main-width) - 2rem);
       color: var(--text-color);
@@ -449,10 +439,6 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   .modal-header {
     padding-left: 1rem;
   }
-  .modal-form-content {
-    border: var(--form-border-size) solid var(--form-border-color);
-    border-radius: var(--form-border-radius);
-  }
 
   #modal-submit {
     background-color: var(--header-background-color);
@@ -467,6 +453,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
   .modal-title {
     font-size: 1.25rem;
     display: inline-block;
+    margin-top: .25rem;
   }
 
   .form-control {
@@ -477,13 +464,11 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
+    appearance: none;
     color: var(--form-input-color);
     background-color: var(--form-input-background-color);
     background-clip: padding-box;
     border: var(--form-border-width) solid var(--form-border-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     border-radius: var(--form-border-radius);
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
   }
@@ -516,6 +501,10 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     padding: 1rem;
     border-top: var(--form-border-size) solid var(--form-border-color);
     border-bottom: var(--form-border-size) solid var(--form-border-color);
+  }
+  .modal-body label {
+    margin-bottom: 0.25rem;
+    display: inline-block;
   }
 
   /* Close button */
@@ -572,6 +561,25 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     text-decoration: none;
     margin-right: 1rem;
   }
+  #disable-reading-mode-btn {
+    display: none;
+    z-index: 2;
+    fill: var(--text-color);
+    background: var(--background-color);
+  }
+  @media (min-width: 1280px) { 
+    #disable-reading-mode-btn {
+      position: fixed;
+      top: 0.75rem;
+      right: 7.5rem;
+    }
+  }
+  @media (max-width: 1279px) {
+    #disable-reading-mode-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
 }
 
 /* Overrides to main content decisions from ar5iv.css */
@@ -721,9 +729,9 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
       justify-content: normal;
     }
     body > header.arxiv-html-header { grid-area: header;  contain: layout; }
-    body > nav.ltx_page_navbar   { grid-area: nav;     contain: layout; }
-    div.ltx_page_main            { grid-area: article; contain: layout; }
-    footer#footer                { grid-area: footer;  contain: layout; } 
+    body > nav.ltx_page_navbar      { grid-area: nav;     contain: layout; }
+    body > div.ltx_page_main        { grid-area: article; contain: layout; }
+    body > footer.arxiv-html-footer { grid-area: footer;  contain: layout; } 
   }
 
   /*mobile*/
@@ -772,7 +780,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
       display: none;
     }
 
-    #footer {
+    .arxiv-html-footer {
       margin-bottom: 8vh;
     }
 
@@ -823,7 +831,7 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     header,
     nav,
     footer,
-    body::after,
+    #beta-badge,
     .ltx_page_footer,
     .back-to-reference-btn {
       display: none;

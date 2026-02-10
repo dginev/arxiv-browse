@@ -89,6 +89,34 @@ function toggleNavTOC() {
     }
 }
 
+// Toggles header and footer
+function toggleReadingMode() {
+    const header = document.querySelectorAll('.arxiv-html-header');
+    const footer = document.querySelectorAll('.arxiv-html-footer');
+const collapseIcon = document.getElementById('disable-reading-mode-btn');
+    const betaBadge = document.getElementById('beta-badge');
+    if (header.length > 0 && collapseIcon) {
+        const style = window.getComputedStyle(header[0]);
+        if (style.display === 'none') {
+            header[0].style.display = 'flex';
+            betaBadge.style.display = 'block';
+            collapseIcon.style.display = 'none';
+        } else {
+            header[0].style.display = 'none';
+            betaBadge.style.display = 'none';
+            collapseIcon.style.display = 'block';
+        }
+    }
+    if (footer.length > 0) {
+        const style = window.getComputedStyle(footer[0]);
+        if (style.display === 'none') {
+            footer[0].style.display = 'block';
+        } else {
+            footer[0].style.display = 'none';
+        }
+    }
+}
+
 
 function showModalForm() {
     const modal = document.getElementById('modal-form');
