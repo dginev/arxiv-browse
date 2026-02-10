@@ -24,8 +24,8 @@ var bugReportState = {
     }
 };
 
-// similar to `initializeColorScheme`, but also updates the toggle button icons,
-// as the DOM is already loaded when this is called.
+// similar to the color parts of `initializeReadingPreferences`,
+// but also updates the toggle button icons, as the DOM is already loaded when this is called.
 function activateColorScheme() {
     let theme;
     let current_theme = localStorage.getItem("ar5iv_theme") || "automatic";
@@ -81,42 +81,29 @@ function toggleColorScheme() {
     activateColorScheme();
 }
 
+// For toc, header and footer, we assume they are enabled by default (on large viewports).
+// What is valuable is when users want to disable them, their preference can be sticky in that browser.
 function toggleNavTOC() {
     const toc = document.querySelectorAll('.ltx_page_navbar>nav.ltx_TOC');
     if (toc.length > 0) {
         const style = window.getComputedStyle(toc[0]);
-        toc[0].style.display = (style.display === 'none') ? 'block' : 'none';
+        let tocDisplay = (style.display === 'none') ? 'block' : 'none';
+        document.documentElement.setAttribute("data-toc-display", tocDisplay);
+        localStorage.setItem('arxiv_html_paper_toc_display', tocDisplay);
     }
 }
 
 // Toggles header and footer
 function toggleReadingMode() {
     const header = document.querySelectorAll('.arxiv-html-header');
-    const footer = document.querySelectorAll('.arxiv-html-footer');
-const collapseIcon = document.getElementById('disable-reading-mode-btn');
-    const betaBadge = document.getElementById('beta-badge');
+    const collapseIcon = document.getElementById('disable-reading-mode-btn');
     if (header.length > 0 && collapseIcon) {
         const style = window.getComputedStyle(header[0]);
-        if (style.display === 'none') {
-            header[0].style.display = 'flex';
-            betaBadge.style.display = 'block';
-            collapseIcon.style.display = 'none';
-        } else {
-            header[0].style.display = 'none';
-            betaBadge.style.display = 'none';
-            collapseIcon.style.display = 'block';
-        }
-    }
-    if (footer.length > 0) {
-        const style = window.getComputedStyle(footer[0]);
-        if (style.display === 'none') {
-            footer[0].style.display = 'block';
-        } else {
-            footer[0].style.display = 'none';
-        }
+        let readingMode = (style.display === 'none') ? 'disabled' : 'enabled';
+        document.documentElement.setAttribute("data-reading-mode", readingMode);
+        localStorage.setItem('arxiv_html_paper_reading_mode', readingMode);
     }
 }
-
 
 function showModalForm() {
     const modal = document.getElementById('modal-form');

@@ -113,6 +113,9 @@
     box-sizing: border-box;
     z-index: 2;
   }
+  [data-reading-mode=enabled] header.arxiv-html-header {
+    display: none;
+  }
   @media only screen and (min-width: 1280px) {
     header.arxiv-html-header {
       position: sticky;
@@ -167,6 +170,9 @@
     -ms-transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
     transform: rotate(-45deg);
+  }
+  [data-reading-mode=enabled] #beta-badge {
+    display: none;
   }
   @media only screen and (min-width: 1280px) {
     #beta-badge {
@@ -308,6 +314,13 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
 */
 
 @layer nav-toc {
+  [data-toc-display=block] .ltx_page_navbar>nav.ltx_TOC {
+    display: block;
+  }
+  [data-toc-display=none] .ltx_page_navbar>nav.ltx_TOC {
+    display: none;
+  }
+
   @media only screen and (min-width: 1280px) {
     .ltx_page_navbar {
       position: sticky;
@@ -317,10 +330,10 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
       user-select: none;
     }
     .ltx_page_navbar>nav.ltx_TOC {
+      display: block;
       position: sticky;
       width: 100%;
       max-height: 90vh;
-      display: block;
       overflow-y: auto;
       color: var(--text-color);
     }
@@ -567,6 +580,9 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     fill: var(--text-color);
     background: var(--background-color);
   }
+  [data-reading-mode=enabled] #disable-reading-mode-btn {
+    display: block;
+  }
   @media (min-width: 1280px) { 
     #disable-reading-mode-btn {
       position: fixed;
@@ -781,7 +797,11 @@ Empirically, the xl >1280px breakpoint seems to be the first where a sidebar TOC
     }
 
     .arxiv-html-footer {
+      display: block;
       margin-bottom: 8vh;
+    }
+    [data-reading-mode=enabled] .arxiv-html-footer {
+      display: none;
     }
 
     .header-message {
